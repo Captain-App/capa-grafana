@@ -67,17 +67,50 @@ async function deployDashboard(filePath, grafanaUrl, apiKey) {
     }, payload);
     
     if (response.statusCode === 200 || response.statusCode === 201) {
+      let dashboardUrl = null;
+      let kioskUrl = null;
+      
+      try {
+        const responseData = JSON.parse(response.body);
+        if (responseData.url) {
+          dashboardUrl = responseData.url;
+          // Construct kiosk URL
+          const urlObj = new URL(responseData.url, grafanaUrl);
+          urlObj.searchParams.set('kiosk', 'tv');
+          kioskUrl = urlObj.toString();
+        } else if (responseData.dashboard && responseData.dashboard.uid) {
+          // Fallback: construct URL from UID
+          const uid = responseData.dashboard.uid;
+          const slug = encodeURIComponent(dashboardData.dashboard.title.toLowerCase().replace(/\s+/g, '-'));
+          dashboardUrl = `${grafanaUrl}/d/${uid}/${slug}`;
+          kioskUrl = `${dashboardUrl}?kiosk=tv`;
+        }
+      } catch (e) {
+        // If parsing fails, construct URL from known data
+        const uid = dashboardData.dashboard.uid || dashboardName;
+        const slug = encodeURIComponent((dashboardData.dashboard.title || dashboardName).toLowerCase().replace(/\s+/g, '-'));
+        dashboardUrl = `${grafanaUrl}/d/${uid}/${slug}`;
+        kioskUrl = `${dashboardUrl}?kiosk=tv`;
+      }
+      
       console.log(`✓ Successfully deployed: ${dashboardName}`);
-      return true;
+      if (kioskUrl) {
+        console.log(`  📺 Kiosk URL: ${kioskUrl}`);
+      }
+      if (dashboardUrl) {
+        console.log(`  🔗 Dashboard URL: ${dashboardUrl}`);
+      }
+      
+      return { success: true, dashboardUrl, kioskUrl, uid: dashboardData.dashboard.uid };
     } else {
       console.error(`✗ Failed to deploy: ${dashboardName}`);
       console.error(`HTTP Code: ${response.statusCode}`);
       console.error(`Response: ${response.body}`);
-      return false;
+      return { success: false };
     }
   } catch (error) {
     console.error(`✗ Error deploying ${path.basename(filePath)}: ${error.message}`);
-    return false;
+    return { success: false };
   }
 }
 
@@ -110,13 +143,24 @@ async function main() {
     files.map(file => deployDashboard(file, grafanaUrl, apiKey))
   );
   
-  const allSuccessful = results.every(result => result === true);
+  const allSuccessful = results.every(result => result.success === true);
   
   if (!allSuccessful) {
     process.exit(1);
   }
   
-  console.log('\n✓ All dashboards deployed successfully');
+  console.log('\n✓ All dashboards deployed successfully\n');
+  console.log('📊 Dashboard URLs:');
+  results.forEach((result, index) => {
+    if (result.success && result.kioskUrl) {
+      const fileName = path.basename(files[index], '.json');
+      console.log(`  ${fileName}:`);
+      console.log(`    Kiosk: ${result.kioskUrl}`);
+      if (result.dashboardUrl) {
+        console.log(`    Normal: ${result.dashboardUrl}`);
+      }
+    }
+  });
 }
 
 main().catch(error => {
