@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitor Screen - Clean View</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+    
+    iframe {
+      width: 100vw;
+      height: 100vh;
+      border: 0;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <iframe
+    id="grafana-frame"
+    src="https://capa.grafana.net/d/monitor-screen/monitor-screen?kiosk=1&refresh=30s&theme=dark"
+    allowfullscreen
+  ></iframe>
+  
+  <script>
+    // This script needs to run AFTER the Grafana page loads
+    // Since we can't directly manipulate cross-origin iframes,
+    // we'll provide instructions for a browser extension approach
+    
+    console.log('For best results, use a browser extension to inject CSS that hides Grafana controls.');
+    console.log('See instructions in the README for setting up CSS injection.');
+    
+    // Auto-refresh every 5 minutes
+    setInterval(() => {
+      document.getElementById('grafana-frame').src = 
+        document.getElementById('grafana-frame').src.split('?')[0] + 
+        '?kiosk=1&refresh=30s&theme=dark&t=' + Date.now();
+    }, 5 * 60 * 1000);
+  </script>
+</body>
+</html>
+
