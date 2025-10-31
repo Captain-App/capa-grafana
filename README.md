@@ -27,6 +27,24 @@ This repository contains Grafana dashboards managed as code and deployed to Graf
      - `GRAFANA_CLOUD_API_KEY`: Your Grafana Cloud API key
      - `GRAFANA_CLOUD_URL`: Your Grafana Cloud instance URL (e.g., `https://your-instance.grafana.net`)
 
+### Monitoring Supabase
+
+These dashboards are configured to monitor your Supabase instance (CPU usage and error counts).
+
+**Fully Automated Setup (Infrastructure as Code):**
+
+The GitHub Actions workflow automatically:
+1. ✅ Creates/updates the Supabase Prometheus data source in Grafana
+2. ✅ Deploys all dashboards configured to use it
+
+**No manual configuration needed!** Just ensure these GitHub secrets are set:
+- `GRAFANA_CLOUD_URL` - Your Grafana Cloud instance URL
+- `GRAFANA_CLOUD_API_KEY` - Grafana API key
+- `SUPABASE_URL` - Your Supabase project URL
+- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key for metrics
+
+**For details on how Supabase Prometheus integration works, see [SUPABASE_PROMETHEUS_EXPLAINED.md](./SUPABASE_PROMETHEUS_EXPLAINED.md)**
+
 ### Project Structure
 
 ```
@@ -36,6 +54,12 @@ This repository contains Grafana dashboards managed as code and deployed to Graf
 │       └── deploy-dashboards.yml    # GitHub Actions workflow
 ├── dashboards/                      # Dashboard JSON definitions
 │   └── example-dashboard.json
+├── scripts/
+│   ├── deploy-dashboards.js        # Deployment script
+│   ├── setup-grafana-datasource.js # Automated data source setup
+│   └── validate-dashboards.js      # Dashboard validation
+├── SUPABASE_SETUP.md               # Supabase monitoring setup guide
+├── SUPABASE_PROMETHEUS_EXPLAINED.md # How Supabase Prometheus works
 └── README.md
 ```
 
@@ -104,3 +128,22 @@ The GitHub Pages site uses CSS clipping to hide the top controls bar, giving you
 
 Each deployment outputs an embed URL that's optimized for iframe embedding. Use this URL directly in your own HTML page or viewer.
 
+## Monitoring Supabase
+
+The dashboards in this repository are configured to monitor your Supabase instance, specifically:
+
+- **CPU Usage**: Database CPU utilization metrics
+- **Error Counts**: Database deadlocks, conflicts, and other error metrics
+
+### Available Dashboards
+
+- **monitor-screen**: Main monitoring dashboard with CPU and error metrics
+- **cpu-and-errors**: Dedicated dashboard focused on CPU usage and error counts
+
+### Setting Up Supabase Metrics
+
+1. Configure the Prometheus data source in Grafana to point to your Supabase metrics endpoint
+2. See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed instructions
+3. After setup, dashboards will automatically display your Supabase instance metrics
+
+**Note**: You'll need your Supabase `service_role` API key to access the metrics endpoint. Keep this key secure!

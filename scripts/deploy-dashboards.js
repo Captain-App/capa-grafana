@@ -130,16 +130,17 @@ async function deployDashboard(filePath, grafanaUrl, apiKey) {
         console.log(`  🔗 Dashboard URL: ${dashboardUrl}`);
       }
       
-      return { success: true, dashboardUrl, kioskUrl, embedUrl, uid: dashboardData.dashboard.uid };
+      return { success: true, dashboardUrl, kioskUrl, embedUrl, uid: dashboardData.dashboard.uid, dashboardName };
     } else {
       console.error(`✗ Failed to deploy: ${dashboardName}`);
       console.error(`HTTP Code: ${response.statusCode}`);
       console.error(`Response: ${response.body}`);
-      return { success: false };
+      return { success: false, dashboardName };
     }
   } catch (error) {
-    console.error(`✗ Error deploying ${path.basename(filePath)}: ${error.message}`);
-    return { success: false };
+    const dashboardName = path.basename(filePath, '.json');
+    console.error(`✗ Error deploying ${dashboardName}: ${error.message}`);
+    return { success: false, dashboardName };
   }
 }
 

@@ -1,9 +1,9 @@
 {
   "dashboard": {
     "id": null,
-    "uid": "monitor-screen",
-    "title": "Monitor Screen",
-    "tags": ["monitoring", "dashboard"],
+    "uid": "cpu-and-errors",
+    "title": "CPU Usage & Error Counts",
+    "tags": ["monitoring", "cpu", "errors"],
     "timezone": "browser",
     "schemaVersion": 38,
     "version": 0,
@@ -25,9 +25,9 @@
               "type": "prometheus",
               "uid": "supabase-metrics"
             },
-            "expr": "100 - (avg(rate(pg_stat_database_blk_read_time{datname=\"postgres\"}[5m])) * 100)",
+            "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
             "refId": "A",
-            "legendFormat": "Database CPU Usage %"
+            "legendFormat": "CPU Usage %"
           }
         ],
         "options": {
@@ -108,6 +108,69 @@
           "x": 12,
           "y": 0
         },
+        "type": "stat",
+        "title": "Current CPU Usage",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "supabase-metrics"
+            },
+            "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+            "refId": "A",
+            "legendFormat": "CPU Usage"
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "green"
+                },
+                {
+                  "value": 70,
+                  "color": "yellow"
+                },
+                {
+                  "value": 90,
+                  "color": "red"
+                }
+              ]
+            },
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          },
+          "overrides": []
+        }
+      },
+      {
+        "id": 3,
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        },
         "type": "timeseries",
         "title": "Error Counts",
         "targets": [
@@ -116,18 +179,18 @@
               "type": "prometheus",
               "uid": "supabase-metrics"
             },
-            "expr": "sum(rate(pg_stat_database_deadlocks[5m]))",
+            "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) by (status)",
             "refId": "A",
-            "legendFormat": "Database Deadlocks"
+            "legendFormat": "{{status}}"
           },
           {
             "datasource": {
               "type": "prometheus",
               "uid": "supabase-metrics"
             },
-            "expr": "sum(rate(pg_stat_database_conflicts[5m]))",
+            "expr": "sum(rate(log_messages_total{level=\"error\"}[5m]))",
             "refId": "B",
-            "legendFormat": "Database Conflicts"
+            "legendFormat": "Application Errors"
           }
         ],
         "options": {
@@ -199,69 +262,6 @@
         }
       },
       {
-        "id": 3,
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 0,
-          "y": 8
-        },
-        "type": "stat",
-        "title": "Current CPU Usage",
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "supabase-metrics"
-            },
-            "expr": "100 - (avg(rate(pg_stat_database_blk_read_time{datname=\"postgres\"}[5m])) * 100)",
-            "refId": "A",
-            "legendFormat": "Database CPU"
-          }
-        ],
-        "options": {
-          "reduceOptions": {
-            "values": false,
-            "calcs": ["lastNotNull"],
-            "fields": ""
-          },
-          "orientation": "auto",
-          "textMode": "auto",
-          "colorMode": "value",
-          "graphMode": "area",
-          "justifyMode": "auto"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "thresholds"
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "value": null,
-                  "color": "green"
-                },
-                {
-                  "value": 70,
-                  "color": "yellow"
-                },
-                {
-                  "value": 90,
-                  "color": "red"
-                }
-              ]
-            },
-            "unit": "percent",
-            "min": 0,
-            "max": 100
-          },
-          "overrides": []
-        }
-      },
-      {
         "id": 4,
         "gridPos": {
           "h": 8,
@@ -270,25 +270,25 @@
           "y": 8
         },
         "type": "stat",
-        "title": "Total Error Count (1h)",
+        "title": "Total Error Count",
         "targets": [
           {
             "datasource": {
               "type": "prometheus",
               "uid": "supabase-metrics"
             },
-            "expr": "sum(increase(pg_stat_database_deadlocks[1h]))",
+            "expr": "sum(increase(http_requests_total{status=~\"5..\"}[1h]))",
             "refId": "A",
-            "legendFormat": "Deadlocks (1h)"
+            "legendFormat": "5xx Errors (1h)"
           },
           {
             "datasource": {
               "type": "prometheus",
               "uid": "supabase-metrics"
             },
-            "expr": "sum(increase(pg_stat_database_conflicts[1h]))",
+            "expr": "sum(increase(log_messages_total{level=\"error\"}[1h]))",
             "refId": "B",
-            "legendFormat": "Conflicts (1h)"
+            "legendFormat": "App Errors (1h)"
           }
         ],
         "options": {
@@ -351,6 +351,6 @@
     "weekStart": ""
   },
   "overwrite": true,
-  "message": "Deployed via GitHub Actions"
+  "message": "CPU Usage and Error Counts Dashboard"
 }
 

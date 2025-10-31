@@ -25,6 +25,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Setup Supabase data source
+        env:
+          GRAFANA_URL: ${{ secrets.GRAFANA_CLOUD_URL }}
+          GRAFANA_API_KEY: ${{ secrets.GRAFANA_CLOUD_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npm run setup-datasource
+
       - name: Deploy dashboards
         env:
           GRAFANA_URL: ${{ secrets.GRAFANA_CLOUD_URL }}
