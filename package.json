@@ -1,0 +1,17 @@
+{
+  "name": "capa-grafana",
+  "version": "1.0.0",
+  "description": "Grafana dashboards as code for Grafana Cloud",
+  "scripts": {
+    "validate": "node scripts/validate-dashboards.js",
+    "deploy": "node scripts/deploy-dashboards.js"
+  },
+  "keywords": [
+    "grafana",
+    "dashboard",
+    "infrastructure-as-code"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+

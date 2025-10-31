@@ -1,0 +1,40 @@
+name: Deploy Dashboards to Grafana Cloud
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'dashboards/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy dashboards
+        env:
+          GRAFANA_URL: ${{ secrets.GRAFANA_CLOUD_URL }}
+          GRAFANA_API_KEY: ${{ secrets.GRAFANA_CLOUD_API_KEY }}
+        run: npm run deploy
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Dashboard Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Dashboards: $(ls -1 dashboards/*.json 2>/dev/null | wc -l)" >> $GITHUB_STEP_SUMMARY
+

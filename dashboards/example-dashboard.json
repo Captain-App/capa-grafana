@@ -1,0 +1,48 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "example-dashboard",
+    "title": "Example Dashboard",
+    "tags": ["example"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 0,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "type": "text",
+        "title": "Welcome",
+        "options": {
+          "content": "# Welcome to Grafana Dashboard as Code\n\nThis is an example dashboard deployed via GitHub Actions."
+        }
+      }
+    ],
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": []
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "links": [],
+    "liveNow": false,
+    "weekStart": ""
+  },
+  "overwrite": true,
+  "message": "Deployed via GitHub Actions"
+}
+
