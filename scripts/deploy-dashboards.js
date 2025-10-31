@@ -72,19 +72,26 @@ async function deployDashboard(filePath, grafanaUrl, apiKey) {
       
       try {
         const responseData = JSON.parse(response.body);
+        const uid = dashboardData.dashboard.uid || dashboardName;
+        const slug = encodeURIComponent((dashboardData.dashboard.title || dashboardName).toLowerCase().replace(/\s+/g, '-'));
+        
+        // Construct full URLs
         if (responseData.url) {
-          dashboardUrl = responseData.url;
-          // Construct kiosk URL
-          const urlObj = new URL(responseData.url, grafanaUrl);
-          urlObj.searchParams.set('kiosk', 'tv');
-          kioskUrl = urlObj.toString();
-        } else if (responseData.dashboard && responseData.dashboard.uid) {
-          // Fallback: construct URL from UID
-          const uid = responseData.dashboard.uid;
-          const slug = encodeURIComponent(dashboardData.dashboard.title.toLowerCase().replace(/\s+/g, '-'));
+          // API returned a URL (might be relative or absolute)
+          if (responseData.url.startsWith('http')) {
+            dashboardUrl = responseData.url;
+          } else {
+            dashboardUrl = `${grafanaUrl}${responseData.url.startsWith('/') ? '' : '/'}${responseData.url}`;
+          }
+        } else {
+          // Construct from UID and slug
           dashboardUrl = `${grafanaUrl}/d/${uid}/${slug}`;
-          kioskUrl = `${dashboardUrl}?kiosk=tv`;
         }
+        
+        // Always construct kiosk URL from dashboard URL
+        const urlObj = new URL(dashboardUrl);
+        urlObj.searchParams.set('kiosk', 'tv');
+        kioskUrl = urlObj.toString();
       } catch (e) {
         // If parsing fails, construct URL from known data
         const uid = dashboardData.dashboard.uid || dashboardName;
