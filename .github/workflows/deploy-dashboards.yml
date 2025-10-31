@@ -39,5 +39,5 @@ jobs:
           echo "- Dashboards: $(ls -1 dashboards/*.json 2>/dev/null | wc -l)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Dashboard URLs" >> $GITHUB_STEP_SUMMARY
-          echo "Check the deployment logs above for kiosk URLs (with \`?kiosk=tv\` parameter)" >> $GITHUB_STEP_SUMMARY
+          echo "Check the deployment logs above for kiosk URLs (with \`?kiosk=1\` parameter)" >> $GITHUB_STEP_SUMMARY
 

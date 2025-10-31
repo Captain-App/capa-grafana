@@ -90,14 +90,14 @@ async function deployDashboard(filePath, grafanaUrl, apiKey) {
         
         // Always construct kiosk URL from dashboard URL
         const urlObj = new URL(dashboardUrl);
-        urlObj.searchParams.set('kiosk', 'tv');
+        urlObj.searchParams.set('kiosk', '1');
         kioskUrl = urlObj.toString();
       } catch (e) {
         // If parsing fails, construct URL from known data
         const uid = dashboardData.dashboard.uid || dashboardName;
         const slug = encodeURIComponent((dashboardData.dashboard.title || dashboardName).toLowerCase().replace(/\s+/g, '-'));
         dashboardUrl = `${grafanaUrl}/d/${uid}/${slug}`;
-        kioskUrl = `${dashboardUrl}?kiosk=tv`;
+        kioskUrl = `${dashboardUrl}?kiosk=1`;
       }
       
       console.log(`✓ Successfully deployed: ${dashboardName}`);
