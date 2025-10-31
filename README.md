@@ -54,3 +54,32 @@ Dashboards are automatically deployed to Grafana Cloud when changes are pushed t
 - Use lowercase with hyphens for filenames (e.g., `my-dashboard.json`)
 - The dashboard UID will be derived from the filename
 
+## Hiding Dashboard Controls
+
+Grafana's built-in kiosk mode (`?kiosk=1`) may still show some controls. For a completely clean view without any toolbar or controls:
+
+### Option 1: Use the Embed URL (Recommended)
+
+The deployment script outputs an **Embed URL** for each dashboard. This URL works best when embedded in an iframe:
+
+1. Copy the embed URL from the deployment logs
+2. Use it in an iframe or the provided wallboard HTML wrapper
+3. See `scripts/generate-wallboard.html` for a ready-to-use template
+
+### Option 2: Use the Wallboard HTML Wrapper
+
+A wallboard HTML file is included (`scripts/generate-wallboard.html`) that provides a clean fullscreen view:
+
+```bash
+# Open the wallboard with your dashboard URL
+open scripts/generate-wallboard.html?url=https://capa.grafana.net/d/monitor-screen/monitor-screen?kiosk=1
+```
+
+Or serve it and pass the dashboard URL as a parameter:
+- `?url=<dashboard-url>` - The dashboard URL to display
+- `?refresh=<seconds>` - Auto-refresh interval (default: 180 seconds, set to 0 to disable)
+
+### Option 3: Direct Embed URL
+
+Each deployment outputs an embed URL that's optimized for iframe embedding. Use this URL directly in your own HTML page or viewer.
+

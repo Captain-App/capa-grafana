@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grafana Dashboard Wallboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: #000;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    iframe {
+      border: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+    }
+    
+    .error {
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <iframe
+    id="dashboard-frame"
+    src=""
+    allowfullscreen
+    frameborder="0"
+  ></iframe>
+  
+  <script>
+    // Get dashboard URL from query parameter or use default
+    const urlParams = new URLSearchParams(window.location.search);
+    const dashboardUrl = urlParams.get('url') || urlParams.get('dashboard');
+    
+    if (!dashboardUrl) {
+      document.body.innerHTML = '<div class="error">Error: Please provide a dashboard URL via ?url= parameter</div>';
+    } else {
+      // Ensure URL has kiosk mode
+      const url = new URL(dashboardUrl);
+      url.searchParams.set('kiosk', '1');
+      url.searchParams.set('theme', 'dark');
+      
+      // Set iframe source
+      document.getElementById('dashboard-frame').src = url.toString();
+      
+      // Auto-refresh the page periodically (optional, adjust interval as needed)
+      const refreshInterval = urlParams.get('refresh') || '180'; // default 3 minutes
+      if (refreshInterval !== '0') {
+        setInterval(() => {
+          window.location.reload();
+        }, parseInt(refreshInterval) * 1000);
+      }
+    }
+  </script>
+</body>
+</html>
+

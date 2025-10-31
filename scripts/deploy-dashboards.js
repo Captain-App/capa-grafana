@@ -69,6 +69,7 @@ async function deployDashboard(filePath, grafanaUrl, apiKey) {
     if (response.statusCode === 200 || response.statusCode === 201) {
       let dashboardUrl = null;
       let kioskUrl = null;
+      let embedUrl = null;
       
       try {
         const responseData = JSON.parse(response.body);
@@ -88,19 +89,40 @@ async function deployDashboard(filePath, grafanaUrl, apiKey) {
           dashboardUrl = `${grafanaUrl}/d/${uid}/${slug}`;
         }
         
-        // Always construct kiosk URL from dashboard URL
-        const urlObj = new URL(dashboardUrl);
-        urlObj.searchParams.set('kiosk', '1');
-        kioskUrl = urlObj.toString();
+        // Construct kiosk URL with controls disabled
+        const kioskUrlObj = new URL(dashboardUrl);
+        kioskUrlObj.searchParams.set('kiosk', '1');
+        kioskUrlObj.searchParams.set('refresh', dashboardData.dashboard.refresh || '30s');
+        kioskUrl = kioskUrlObj.toString();
+        
+        // Construct embed URL - clean view without toolbar
+        // Use regular dashboard URL with kiosk and embed-friendly params
+        // This URL works best when embedded in an iframe
+        const embedUrlObj = new URL(dashboardUrl);
+        embedUrlObj.searchParams.set('kiosk', '1');
+        embedUrlObj.searchParams.set('refresh', dashboardData.dashboard.refresh || '30s');
+        embedUrlObj.searchParams.set('theme', 'dark');
+        embedUrl = embedUrlObj.toString();
+        
       } catch (e) {
         // If parsing fails, construct URL from known data
         const uid = dashboardData.dashboard.uid || dashboardName;
         const slug = encodeURIComponent((dashboardData.dashboard.title || dashboardName).toLowerCase().replace(/\s+/g, '-'));
         dashboardUrl = `${grafanaUrl}/d/${uid}/${slug}`;
-        kioskUrl = `${dashboardUrl}?kiosk=1`;
+        const kioskUrlObj = new URL(dashboardUrl);
+        kioskUrlObj.searchParams.set('kiosk', '1');
+        kioskUrl = kioskUrlObj.toString();
+        const embedUrlObj = new URL(dashboardUrl);
+        embedUrlObj.searchParams.set('kiosk', '1');
+        embedUrlObj.searchParams.set('refresh', '30s');
+        embedUrlObj.searchParams.set('theme', 'dark');
+        embedUrl = embedUrlObj.toString();
       }
       
       console.log(`✓ Successfully deployed: ${dashboardName}`);
+      if (embedUrl) {
+        console.log(`  🖼️  Embed URL (no controls): ${embedUrl}`);
+      }
       if (kioskUrl) {
         console.log(`  📺 Kiosk URL: ${kioskUrl}`);
       }
@@ -108,7 +130,7 @@ async function deployDashboard(filePath, grafanaUrl, apiKey) {
         console.log(`  🔗 Dashboard URL: ${dashboardUrl}`);
       }
       
-      return { success: true, dashboardUrl, kioskUrl, uid: dashboardData.dashboard.uid };
+      return { success: true, dashboardUrl, kioskUrl, embedUrl, uid: dashboardData.dashboard.uid };
     } else {
       console.error(`✗ Failed to deploy: ${dashboardName}`);
       console.error(`HTTP Code: ${response.statusCode}`);
@@ -159,12 +181,17 @@ async function main() {
   console.log('\n✓ All dashboards deployed successfully\n');
   console.log('📊 Dashboard URLs:');
   results.forEach((result, index) => {
-    if (result.success && result.kioskUrl) {
+    if (result.success) {
       const fileName = path.basename(files[index], '.json');
       console.log(`  ${fileName}:`);
-      console.log(`    Kiosk: ${result.kioskUrl}`);
+      if (result.embedUrl) {
+        console.log(`    🖼️  Embed (no controls): ${result.embedUrl}`);
+      }
+      if (result.kioskUrl) {
+        console.log(`    📺 Kiosk: ${result.kioskUrl}`);
+      }
       if (result.dashboardUrl) {
-        console.log(`    Normal: ${result.dashboardUrl}`);
+        console.log(`    🔗 Normal: ${result.dashboardUrl}`);
       }
     }
   });
