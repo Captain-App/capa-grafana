@@ -25,9 +25,9 @@
               "type": "prometheus",
               "uid": "supabase-metrics"
             },
-            "expr": "100 - (avg(rate(pg_stat_database_blk_read_time{datname=\"postgres\"}[5m])) * 100)",
+            "expr": "100 - (avg by (cpu) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
             "refId": "A",
-            "legendFormat": "Database CPU Usage %"
+            "legendFormat": "CPU Usage %"
           }
         ],
         "options": {
@@ -116,18 +116,36 @@
               "type": "prometheus",
               "uid": "supabase-metrics"
             },
-            "expr": "sum(rate(pg_stat_database_deadlocks[5m]))",
+            "expr": "sum(rate(pg_stat_database_deadlocks_total[5m]))",
             "refId": "A",
-            "legendFormat": "Database Deadlocks"
+            "legendFormat": "Database Deadlocks/sec"
           },
           {
             "datasource": {
               "type": "prometheus",
               "uid": "supabase-metrics"
             },
-            "expr": "sum(rate(pg_stat_database_conflicts[5m]))",
+            "expr": "sum(rate(pg_stat_database_conflicts_total[5m]))",
             "refId": "B",
-            "legendFormat": "Database Conflicts"
+            "legendFormat": "Database Conflicts/sec"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "supabase-metrics"
+            },
+            "expr": "sum(rate(http_status_codes_total{code=~\"5..\"}[5m]))",
+            "refId": "C",
+            "legendFormat": "HTTP 5xx Errors/sec"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "supabase-metrics"
+            },
+            "expr": "sum(rate(supabase_usage_metrics_user_queries_total[5m]))",
+            "refId": "D",
+            "legendFormat": "User Queries/sec"
           }
         ],
         "options": {
@@ -214,9 +232,9 @@
               "type": "prometheus",
               "uid": "supabase-metrics"
             },
-            "expr": "100 - (avg(rate(pg_stat_database_blk_read_time{datname=\"postgres\"}[5m])) * 100)",
+            "expr": "sum(rate(supabase_usage_metrics_user_queries_total[5m]))",
             "refId": "A",
-            "legendFormat": "Database CPU"
+            "legendFormat": "Queries/sec"
           }
         ],
         "options": {
@@ -277,7 +295,7 @@
               "type": "prometheus",
               "uid": "supabase-metrics"
             },
-            "expr": "sum(increase(pg_stat_database_deadlocks[1h]))",
+            "expr": "sum(increase(pg_stat_database_deadlocks_total[1h]))",
             "refId": "A",
             "legendFormat": "Deadlocks (1h)"
           },
@@ -286,8 +304,17 @@
               "type": "prometheus",
               "uid": "supabase-metrics"
             },
-            "expr": "sum(increase(pg_stat_database_conflicts[1h]))",
+            "expr": "sum(increase(http_status_codes_total{code=~\"5..\"}[1h]))",
             "refId": "B",
+            "legendFormat": "HTTP 5xx Errors (1h)"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "supabase-metrics"
+            },
+            "expr": "sum(increase(pg_stat_database_conflicts_total[1h]))",
+            "refId": "C",
             "legendFormat": "Conflicts (1h)"
           }
         ],

@@ -6,7 +6,8 @@
     "validate": "node scripts/validate-dashboards.js",
     "deploy": "node scripts/deploy-dashboards.js",
     "setup-datasource": "node scripts/setup-grafana-datasource.js",
-    "deploy-all": "npm run setup-datasource && npm run deploy"
+    "deploy-all": "npm run setup-datasource && npm run deploy",
+    "test-metrics": "node scripts/test-supabase-metrics.js"
   },
   "keywords": [
     "grafana",

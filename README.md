@@ -45,6 +45,8 @@ The GitHub Actions workflow automatically:
 
 **For details on how Supabase Prometheus integration works, see [SUPABASE_PROMETHEUS_EXPLAINED.md](./SUPABASE_PROMETHEUS_EXPLAINED.md)**
 
+**If dashboards show no data, see [QUERY_TROUBLESHOOTING.md](./QUERY_TROUBLESHOOTING.md) for help finding the right metrics.**
+
 ### Project Structure
 
 ```

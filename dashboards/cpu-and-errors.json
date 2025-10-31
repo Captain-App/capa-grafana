@@ -25,7 +25,7 @@
               "type": "prometheus",
               "uid": "supabase-metrics"
             },
-            "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+            "expr": "100 - (avg by (cpu) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
             "refId": "A",
             "legendFormat": "CPU Usage %"
           }
@@ -116,7 +116,7 @@
               "type": "prometheus",
               "uid": "supabase-metrics"
             },
-            "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+            "expr": "100 - (avg by (cpu) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
             "refId": "A",
             "legendFormat": "CPU Usage"
           }
@@ -179,18 +179,27 @@
               "type": "prometheus",
               "uid": "supabase-metrics"
             },
-            "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) by (status)",
+            "expr": "sum(rate(http_status_codes_total{code=~\"5..\"}[5m])) by (code)",
             "refId": "A",
-            "legendFormat": "{{status}}"
+            "legendFormat": "HTTP {{code}}"
           },
           {
             "datasource": {
               "type": "prometheus",
               "uid": "supabase-metrics"
             },
-            "expr": "sum(rate(log_messages_total{level=\"error\"}[5m]))",
+            "expr": "sum(rate(pg_stat_database_deadlocks_total[5m]))",
             "refId": "B",
-            "legendFormat": "Application Errors"
+            "legendFormat": "Database Deadlocks/sec"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "supabase-metrics"
+            },
+            "expr": "sum(rate(pg_stat_database_conflicts_total[5m]))",
+            "refId": "C",
+            "legendFormat": "Database Conflicts/sec"
           }
         ],
         "options": {
@@ -277,18 +286,27 @@
               "type": "prometheus",
               "uid": "supabase-metrics"
             },
-            "expr": "sum(increase(http_requests_total{status=~\"5..\"}[1h]))",
+            "expr": "sum(increase(http_status_codes_total{code=~\"5..\"}[1h]))",
             "refId": "A",
-            "legendFormat": "5xx Errors (1h)"
+            "legendFormat": "HTTP 5xx Errors (1h)"
           },
           {
             "datasource": {
               "type": "prometheus",
               "uid": "supabase-metrics"
             },
-            "expr": "sum(increase(log_messages_total{level=\"error\"}[1h]))",
+            "expr": "sum(increase(pg_stat_database_deadlocks_total[1h]))",
             "refId": "B",
-            "legendFormat": "App Errors (1h)"
+            "legendFormat": "Deadlocks (1h)"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "supabase-metrics"
+            },
+            "expr": "sum(increase(pg_stat_database_conflicts_total[1h]))",
+            "refId": "C",
+            "legendFormat": "Conflicts (1h)"
           }
         ],
         "options": {
