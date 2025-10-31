@@ -97,7 +97,8 @@ async function createOrUpdateDataSource(grafanaUrl, apiKey, datasourceConfig) {
   const method = existing ? 'PUT' : 'POST';
   
   // When updating, preserve existing ID and version, but ensure UID matches
-  const payload = JSON.stringify({
+  // IMPORTANT: Always include secureJsonData even when updating, otherwise password won't be saved
+  const payloadData = {
     ...datasourceConfig,
     ...(existing && { 
       id: existing.id, 
@@ -105,7 +106,15 @@ async function createOrUpdateDataSource(grafanaUrl, apiKey, datasourceConfig) {
       // Ensure UID is set correctly (update if it was different)
       uid: datasourceConfig.uid || existing.uid
     })
-  });
+  };
+  
+  // Always include secureJsonData - Grafana requires it for Basic Auth passwords
+  // When updating, we MUST include secureJsonData again, otherwise password is cleared
+  payloadData.secureJsonData = {
+    basicAuthPassword: datasourceConfig.secureJsonData.basicAuthPassword
+  };
+  
+  const payload = JSON.stringify(payloadData);
 
   const response = await makeRequest(url, {
     method: method,

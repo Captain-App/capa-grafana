@@ -6,6 +6,7 @@
     "validate": "node scripts/validate-dashboards.js",
     "deploy": "node scripts/deploy-dashboards.js",
     "setup-datasource": "node scripts/setup-grafana-datasource.js",
+    "fix-datasource-auth": "node scripts/fix-datasource-auth.js",
     "deploy-all": "npm run setup-datasource && npm run deploy",
     "test-metrics": "node scripts/test-supabase-metrics.js"
   },
