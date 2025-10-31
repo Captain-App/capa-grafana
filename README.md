@@ -79,7 +79,28 @@ Or serve it and pass the dashboard URL as a parameter:
 - `?url=<dashboard-url>` - The dashboard URL to display
 - `?refresh=<seconds>` - Auto-refresh interval (default: 180 seconds, set to 0 to disable)
 
-### Option 3: Direct Embed URL
+### Option 3: GitHub Pages (Recommended for Clean Display)
+
+This repository includes a GitHub Pages site that wraps dashboards and hides the top controls:
+
+1. **Access your dashboard**: After enabling GitHub Pages, visit:
+   ```
+   https://captain-app.github.io/capa-grafana/monitor-screen.html
+   ```
+
+2. **Custom dashboard**: Use the index page with a URL parameter:
+   ```
+   https://captain-app.github.io/capa-grafana/?url=https://capa.grafana.net/d/your-dashboard/your-dashboard?kiosk=1
+   ```
+
+3. **Enable GitHub Pages** (if not already enabled):
+   - Go to Settings → Pages in your GitHub repository
+   - Source: Deploy from a branch
+   - Branch: `gh-pages` (will be created automatically) or `main` / `docs`
+
+The GitHub Pages site uses CSS clipping to hide the top controls bar, giving you a completely clean display.
+
+### Option 4: Direct Embed URL
 
 Each deployment outputs an embed URL that's optimized for iframe embedding. Use this URL directly in your own HTML page or viewer.
 

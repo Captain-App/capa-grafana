@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grafana Dashboard - Monitor Screen</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+    
+    .dashboard-wrapper {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    iframe {
+      position: absolute;
+      top: -60px; /* Hide the top controls by offsetting */
+      left: 0;
+      width: 100%;
+      height: calc(100% + 60px); /* Extend height to compensate for offset */
+      border: 0;
+      pointer-events: auto;
+    }
+    
+    /* Alternative: Use clip-path to crop the top */
+    .dashboard-wrapper.cropped iframe {
+      top: 0;
+      clip-path: inset(60px 0 0 0); /* Crop top 60px */
+      -webkit-clip-path: inset(60px 0 0 0);
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-wrapper cropped">
+    <iframe
+      id="dashboard-frame"
+      src=""
+      allowfullscreen
+      frameborder="0"
+      scrolling="no"
+    ></iframe>
+  </div>
+  
+  <script>
+    // Get dashboard URL from query parameter or use default
+    const urlParams = new URLSearchParams(window.location.search);
+    const dashboardUrl = urlParams.get('url') || urlParams.get('dashboard');
+    
+    // Default dashboard - monitor-screen
+    const defaultDashboard = 'https://capa.grafana.net/d/monitor-screen/monitor-screen?kiosk=1&refresh=30s&theme=dark';
+    
+    if (dashboardUrl) {
+      // Ensure URL has kiosk mode and other params
+      const url = new URL(dashboardUrl);
+      url.searchParams.set('kiosk', '1');
+      if (!url.searchParams.has('refresh')) {
+        url.searchParams.set('refresh', '30s');
+      }
+      if (!url.searchParams.has('theme')) {
+        url.searchParams.set('theme', 'dark');
+      }
+      document.getElementById('dashboard-frame').src = url.toString();
+    } else {
+      document.getElementById('dashboard-frame').src = defaultDashboard;
+    }
+    
+    // Handle iframe load errors
+    document.getElementById('dashboard-frame').addEventListener('error', function() {
+      console.error('Failed to load dashboard');
+    });
+    
+    // Optional: Auto-refresh the page periodically
+    const refreshInterval = urlParams.get('refresh') || '0';
+    if (refreshInterval !== '0' && refreshInterval !== 'false') {
+      setInterval(() => {
+        window.location.reload();
+      }, parseInt(refreshInterval) * 1000);
+    }
+  </script>
+</body>
+</html>
+
