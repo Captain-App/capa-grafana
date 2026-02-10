@@ -47,3 +47,4 @@ Host a server-side proxy that authenticates and serves the dashboard content, by
 
 The HTML files here attempt to embed dashboards, but due to Grafana Cloud's authentication requirements, **direct URL access in kiosk mode is recommended** for monitor screens.
 
+

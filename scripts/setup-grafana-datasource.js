@@ -96,23 +96,37 @@ async function createOrUpdateDataSource(grafanaUrl, apiKey, datasourceConfig) {
   
   const method = existing ? 'PUT' : 'POST';
   
-  // When updating, preserve existing ID and version, but ensure UID matches
-  // IMPORTANT: Always include secureJsonData even when updating, otherwise password won't be saved
+  // Build payload - for updates, we need to be careful about what we include
   const payloadData = {
-    ...datasourceConfig,
-    ...(existing && { 
-      id: existing.id, 
-      version: existing.version,
-      // Ensure UID is set correctly (update if it was different)
-      uid: datasourceConfig.uid || existing.uid
-    })
+    name: datasourceConfig.name,
+    type: datasourceConfig.type,
+    access: datasourceConfig.access,
+    url: datasourceConfig.url,
+    isDefault: datasourceConfig.isDefault || false,
+    basicAuth: true,
+    basicAuthUser: datasourceConfig.basicAuthUser,
+    jsonData: datasourceConfig.jsonData || {},
+    secureJsonData: {
+      basicAuthPassword: datasourceConfig.secureJsonData.basicAuthPassword
+    }
   };
-  
-  // Always include secureJsonData - Grafana requires it for Basic Auth passwords
-  // When updating, we MUST include secureJsonData again, otherwise password is cleared
-  payloadData.secureJsonData = {
-    basicAuthPassword: datasourceConfig.secureJsonData.basicAuthPassword
-  };
+
+  // For updates, include ID, version, and UID
+  if (existing) {
+    payloadData.id = existing.id;
+    payloadData.version = existing.version;
+    payloadData.uid = datasourceConfig.uid || existing.uid;
+    
+    // CRITICAL: When updating, we MUST include secureJsonData
+    // If we don't, Grafana clears the password!
+    // We can't read the existing secureJsonData (it's hidden), so we always set it
+    payloadData.secureJsonData = {
+      basicAuthPassword: datasourceConfig.secureJsonData.basicAuthPassword
+    };
+  } else {
+    // For new data sources, include UID
+    payloadData.uid = datasourceConfig.uid;
+  }
   
   const payload = JSON.stringify(payloadData);
 
@@ -203,8 +217,9 @@ async function main() {
     process.exit(1);
   }
 
-  // Extract project ref from Supabase URL if needed
-  // Support both formats: https://app.captainapp.co.uk or https://xxxxx.supabase.co
+  // Determine metrics URL
+  // For custom domains, use the custom domain URL directly
+  // Metrics endpoint requires both apikey header and Basic Auth
   let metricsUrl;
   if (supabaseUrl.includes('supabase.co')) {
     // Extract project ref from URL
@@ -215,7 +230,7 @@ async function main() {
       metricsUrl = `${supabaseUrl}/customer/v1/privileged/metrics`;
     }
   } else {
-    // Custom domain - try both possible paths
+    // Custom domain - use it directly
     metricsUrl = `${supabaseUrl}/customer/v1/privileged/metrics`;
   }
 
@@ -230,9 +245,13 @@ async function main() {
     url: metricsUrl,
     isDefault: false,
     jsonData: {
-      httpMethod: 'POST',
+      httpMethod: 'GET',
       queryTimeout: '60s',
-      timeInterval: '30s'
+      timeInterval: '30s',
+      // Try to add custom headers - Grafana may not support this for Prometheus
+      // But worth trying: httpHeaderName1 and httpHeaderValue1
+      httpHeaderName1: 'apikey',
+      httpHeaderValue1: supabaseServiceRoleKey
     },
     secureJsonData: {
       basicAuthPassword: supabaseServiceRoleKey

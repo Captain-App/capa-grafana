@@ -64,8 +64,20 @@ async function fixDataSource() {
   console.log(`Found data source: ${existing.name} (ID: ${existing.id})`);
 
   // Update with secureJsonData to set the password
+  // IMPORTANT: We must include all required fields, not just spread existing
   const updatePayload = {
-    ...existing,
+    id: existing.id,
+    version: existing.version,
+    uid: existing.uid || 'supabase-metrics',
+    name: existing.name,
+    type: existing.type,
+    access: existing.access || 'proxy',
+    url: existing.url,
+    isDefault: existing.isDefault || false,
+    basicAuth: true,
+    basicAuthUser: 'service_role',
+    jsonData: existing.jsonData || {},
+    // CRITICAL: This is what saves the password!
     secureJsonData: {
       basicAuthPassword: supabaseServiceRoleKey
     }
@@ -82,11 +94,36 @@ async function fixDataSource() {
   }, JSON.stringify(updatePayload));
 
   if (updateResponse.statusCode === 200) {
+    const result = JSON.parse(updateResponse.body);
     console.log('✓ Successfully updated data source with Basic Auth password');
+    console.log(`  Data source ID: ${result.id}`);
+    console.log(`  Name: ${result.name}`);
+    console.log(`  URL: ${result.url}`);
+    console.log(`  Basic Auth User: ${result.basicAuthUser}`);
     console.log('  Password has been securely saved in Grafana');
+    
+    // Test the query endpoint
+    console.log('\n  Testing query endpoint...');
+    const testUrl = `${grafanaUrl}/api/datasources/proxy/${result.id}/api/v1/query?query=up`;
+    const testResponse = await makeRequest(testUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${grafanaApiKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (testResponse.statusCode === 200) {
+      console.log('  ✓ Query test successful! Data source is working.');
+    } else {
+      console.log(`  ⚠ Query test returned HTTP ${testResponse.statusCode}`);
+      console.log(`  Response: ${testResponse.body.substring(0, 200)}`);
+    }
+    
     console.log('\n  Test the data source in Grafana UI to verify it works');
   } else {
-    console.error(`Failed to update: ${updateResponse.statusCode} - ${updateResponse.body}`);
+    console.error(`Failed to update: ${updateResponse.statusCode}`);
+    console.error(`Response: ${updateResponse.body}`);
     process.exit(1);
   }
 }

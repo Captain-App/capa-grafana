@@ -18,3 +18,4 @@ fi
 echo "Monitor screen opened in kiosk mode"
 echo "Press Alt+F4 (or Cmd+Q) to exit"
 
+

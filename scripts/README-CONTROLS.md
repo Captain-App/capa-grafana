@@ -90,3 +90,4 @@ Run a local proxy that injects CSS to hide controls. This requires Node.js/Pytho
 
 Try Solution 1 (Tampermonkey) first - it's the easiest and most reliable. The user script will automatically hide controls when you visit the Grafana dashboard.
 
+
