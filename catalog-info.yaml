@@ -1,0 +1,15 @@
+# Backstage catalog entry — discovered by https://backstage.captainapp.co.uk
+# (captain-k3s GitHub App). Edit freely: type, lifecycle, system, owner, links.
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: capa-grafana
+  description: "Grafana dashboards as code for Grafana Cloud"
+  annotations:
+    github.com/project-slug: Captain-App/capa-grafana
+  tags:
+    - javascript
+spec:
+  type: service
+  lifecycle: production
+  owner: group:default/captain-app
